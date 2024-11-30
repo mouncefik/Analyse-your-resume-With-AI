@@ -60,9 +60,8 @@ nltk.download(['stopwords','wordnet'])
 #warning
 import warnings 
 warnings.filterwarnings('ignore')
-
-
-
+download("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
 
 nlp = spacy.load('en_core_web_sm')
 nltk.download('punkt')
