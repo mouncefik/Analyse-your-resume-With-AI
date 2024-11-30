@@ -1,5 +1,4 @@
 import streamlit as st
-import download_models
 st.set_page_config(page_title="AI Resume Analyzer", page_icon=":page_facing_up:")
 import os
 import io
@@ -57,8 +56,6 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 nltk.download(['stopwords','wordnet'])
-import en_core_web_lg
-nlp = en_core_web_lg.load()
 #warning
 import warnings 
 warnings.filterwarnings('ignore')
