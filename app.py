@@ -535,7 +535,7 @@ def display_resume_analysis(resume_data, user_name):
                  title="Resume Score Distribution by Category",
                  labels={'x': 'Category', 'y': 'Score'})
     st.plotly_chart(fig)
-    
+
 
     
 
