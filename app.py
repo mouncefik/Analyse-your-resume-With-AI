@@ -61,12 +61,7 @@ nltk.download(['stopwords','wordnet'])
 import warnings 
 warnings.filterwarnings('ignore')
 
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    print("Downloading the 'en_core_web_sm' model...")
-    download("en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
+
 
 
 nlp = spacy.load('en_core_web_sm')
