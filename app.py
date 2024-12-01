@@ -927,30 +927,6 @@ def admin_login():
             st.error("Invalid username or password")
     st.write("Username : TriageTalent")
     st.write("Password : 2024")
-    
-def chatbot():
-    st.title("Chatbot")
-
-    # User authentication
-    user_id = st.text_input("Enter your name:", value="")
-    if not user_id:
-        st.stop()
-
-    # User input and send button in a fixed layout
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        user_input = st.text_input("You:", value="", key=f"{user_id}_user_input")
-    with col2:
-        if st.button("Send"):
-            if user_input:  # Check if user input is not empty
-                response = get_chatbot_response(user_input, user_id)
-                output_area.value += f"You: {user_input}\n"
-                output_area.value += f"Ai assistant: {response}\n"
-                st.session_state[f"{user_id}_user_input"] = ""  # Clear the input field after sending
-
-    # Display chat history with fixed size for output
-    output_area = st.text_area("", height=300, disabled=True, key="output_area")  # Set the height to 300 pixels
-
 # Set your NeBius API key
 nebius_api_key = os.getenv('NEBIUS_API_KEY')
 
