@@ -9,6 +9,7 @@ The **AI Resume Analyzer** is a comprehensive web application developed using St
 - **Job Search**: Integrates web scraping to help users find job listings tailored to their profile.
 - **Feedback Collection**: Enables users to submit feedback, which is stored for continuous improvement.
 - **Admin Dashboard**: Provides an admin interface for managing and visualizing user data and feedback, including analytics such as user activity and experience distribution.
+- **Chatbot**: Our application includes a chatbot feature that assists recruiters in obtaining information about candidates, streamlining communication and enhancing the overall recruitment process.
 
 ## Technologies Used
 - **Frontend**: Streamlit for user interface
@@ -25,7 +26,7 @@ The **AI Resume Analyzer** is a comprehensive web application developed using St
 ### Installation Steps
 1. Clone the repository:
    ```bash
-   git clone 
+   git clone https://github.com/mouncefik/talent-triage.git
    cd AI_Resume_Analyzer
    ```
 2. Install dependencies:
