@@ -57,12 +57,13 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 nltk.download(['stopwords','wordnet'])
 #warning
+from openai import OpenAI
 import warnings 
 warnings.filterwarnings('ignore')
-download("en_core_web_sm")
+#download("en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 
-nlp = spacy.load('en_core_web_sm')
+#nlp = spacy.load('en_core_web_sm')
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('maxent_ne_chunker')
@@ -123,9 +124,9 @@ def get_database_connection():
             host=os.getenv('DB_HOST', 'localhost'),
             user=os.getenv('DB_USER', 'root'),
             password=os.getenv('DB_PASSWORD', 'SQLpassword')
-            
         )
-         # Create a cursor object
+
+        # Create a cursor object
         with connection.cursor() as cursor:
             # Create the database if it does not exist
             database_name = os.getenv('DB_NAME', 'AdminAccess') 
@@ -286,8 +287,12 @@ def analyze_resume(pdf_path):
         for match_id, start, end in matches:
             span = doc_resume[start:end]
             education.add(span.text)
-    education_list = list(education)  
-    degree = education_list[0]
+    education_list = list(education)    
+    if education_list:
+        degree = education_list[0]
+    else:
+        degree = None
+    
 
     skills_found = [ent.text for ent in resume_doc.ents if ent.label_ == "SKILL"]
 
@@ -309,7 +314,7 @@ def analyze_resume(pdf_path):
             experience.append((exp, role))
 
     experience = list(set(experience))  # Convert to set to remove duplicates
-
+    
     # Calculate the resume score(adapted of each job offer)
     required_skills = set([
         "Python", "Machine Learning", "Data Analysis", "Project Management",
@@ -923,17 +928,120 @@ def admin_login():
     st.write("Username : TriageTalent")
     st.write("Password : 2024")
     
+def chatbot():
+    st.title("Chatbot")
 
+    # User authentication
+    user_id = st.text_input("Enter your name:", value="")
+    if not user_id:
+        st.stop()
+
+    # User input and send button in a fixed layout
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        user_input = st.text_input("You:", value="", key=f"{user_id}_user_input")
+    with col2:
+        if st.button("Send"):
+            if user_input:  # Check if user input is not empty
+                response = get_chatbot_response(user_input, user_id)
+                output_area.value += f"You: {user_input}\n"
+                output_area.value += f"Ai assistant: {response}\n"
+                st.session_state[f"{user_id}_user_input"] = ""  # Clear the input field after sending
+
+    # Display chat history with fixed size for output
+    output_area = st.text_area("", height=300, disabled=True, key="output_area")  # Set the height to 300 pixels
+
+# Set your NeBius API key
+nebius_api_key = os.getenv('NEBIUS_API_KEY')
+
+# Initialize the NeBius client
+client = OpenAI(
+    base_url="https://api.studio.nebius.ai/v1/",
+    api_key=nebius_api_key,
+)
+
+# Function to handle chatbot
+def chatbot():
+    st.sidebar.title("Admin Chatbot 🤖")
+    st.sidebar.markdown("Ask me anything about candidates!")
+
+    # Ensure chat history is tracked
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    # Sidebar input and send button
+    user_input = st.sidebar.text_input("You:", value="", key="user_input")
+    if st.sidebar.button("Send"):
+        st.session_state.chat_history.append(("You", user_input))
+        response = get_chatbot_response(user_input)  # Call the chatbot response logic
+        st.session_state.chat_history.append(("Bot", response))
+
+    # Display chat history in the sidebar
+    st.sidebar.markdown("### Chat History")
+    for message in st.session_state.chat_history:
+        if message[0] == "You":
+            st.sidebar.markdown(f"**{message[0]}:** {message[1]}")
+        else:
+            st.sidebar.markdown(f"**{message[0]}:** {message[1]}")
+    
+# Function to get chatbot response using NeBius API with context
+def get_chatbot_response(user_input):
+    try:
+        # Fetch user data and feedback data
+        user_data = get_user_data()
+        feedback_data = get_feedback_data()
+        
+        # Convert data to string for context
+        user_data_str = user_data.to_string(index=False)
+        feedback_data_str = feedback_data.to_string(index=False)
+        
+        # Create context for the chatbot
+        context = f"""
+        You are an AI assistant for the Admin Dashboard.
+        Here is the current user data:
+        {user_data_str}
+        
+        Here is the current feedback data:
+        {feedback_data_str}
+        """
+        
+        completion = client.chat.completions.create(
+            model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+            messages=[
+                {
+                    "role": "system",
+                    "content": context
+                },
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+            ],
+            temperature=0.6
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception as e:
+        return f"Error: {e}"
+    
+# Function to show admin dashboard with chatbot
 def show_admin_dashboard():
-    """
-    Displays the admin dashboard with user data, feedback data, and analytics.
+    
+    st.title("👨‍💼 Admin Dashboard")
+    st.title("Testing a Job Description with Required Skills")
+    st.markdown("""
+    We are seeking a highly skilled Data Scientist with expertise in machine learning, data analysis, and project management to join our dynamic team. The ideal candidate will leverage their technical skills to drive data-driven insights and solutions, manage projects effectively, and ensure the scalability and efficiency of our computing infrastructure.
+    
+    **Required Skills:**
 
-    This function retrieves and displays user and feedback data from the database,
-    and provides options to download this data as CSV files. It also shows various
-    analytics based on the collected data.
-    """
-    st.title("Admin Dashboard")
-    st.subheader("User Data")
+    The job description is based on the following required skills:
+    - **Python**: Proficiency in using Python for scripting, automation, and software development.
+    - **Machine Learning**: Ability to apply machine learning techniques for data modeling and prediction.
+    - **Data Analysis**: Skills in analyzing and interpreting data to drive business decisions.
+    - **Project Management**: Experience in managing projects from inception to completion, ensuring timely delivery and quality.
+    - **Cloud Computing**: Knowledge of cloud platforms and services for scalable and efficient computing solutions.
+    - **SQL**: Expertise in using SQL for data manipulation, querying, and database management.
+    """)
+    st.subheader("📊 User Data")
     user_data = get_user_data()
     st.dataframe(user_data)
     
@@ -943,7 +1051,7 @@ def show_admin_dashboard():
         href = f'<a href="data:file/csv;base64,{b64}" download="user_data.csv">Download CSV File</a>'
         st.markdown(href, unsafe_allow_html=True)
         
-    st.subheader("Feedback Data")
+    st.subheader("💬 Feedback Data")
     feedback_data = get_feedback_data()
     st.dataframe(feedback_data)
     
@@ -953,12 +1061,15 @@ def show_admin_dashboard():
         href = f'<a href="data:file/csv;base64,{b64}" download="feedback_data.csv">Download CSV File</a>'
         st.markdown(href, unsafe_allow_html=True)
     
-    st.subheader("Analytics")
+    st.subheader("📈 Analytics")
     show_analytics()
 
     if st.button("Logout", key="admin_logout_button"):
         st.session_state.admin_logged_in = False
         st.success("You have been logged out.")
+    
+    # Chatbot Integration
+    chatbot()
 
 def get_user_data():
     try:
@@ -1066,13 +1177,6 @@ def generate_unique_id():
     return str(uuid.uuid4())
 
 def main():
-    """
-    Main function to run the AI Resume Analyzer application.
-    
-    This function sets up the Streamlit page, manages user sessions,
-    handles navigation, and renders the appropriate page content based
-    on user selection. It also includes error handling for robustness.
-    """
     try:
         
         init_database()
@@ -1095,8 +1199,9 @@ def main():
             "device_info": device_info
         }
         
-        st.sidebar.title("AI Resume Analyzer & Recommendation System")
-        st.sidebar.image("logo.png", width=240)        
+        #st.sidebar.title("AI Resume Analyzer & Recommendation System")
+        st.sidebar.markdown("<span style='color:orange; font-size: 1.5em; font-weight: bold'>AI Resume Analyzer & Recommendation System</span>", unsafe_allow_html=True)
+        st.sidebar.image("asset/logo_orange.svg")        
         pages = ["User", "Find Jobs", "Feedback", "About", "Admin"]
         #page = st.sidebar.radio("Navigation", pages)
         page = st.sidebar.selectbox("Navigation", pages)

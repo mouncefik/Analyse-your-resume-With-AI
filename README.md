@@ -25,7 +25,7 @@ The **AI Resume Analyzer** is a comprehensive web application developed using St
 ### Installation Steps
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Radom12/AI_Resume_Analyzer
+   git clone 
    cd AI_Resume_Analyzer
    ```
 2. Install dependencies:
@@ -41,6 +41,7 @@ The **AI Resume Analyzer** is a comprehensive web application developed using St
      DB_USER=root
      DB_PASSWORD=yourpassword
      DB_NAME=resume_analyzer
+     NEBIUS_API_KEY=""
      ```
 4. Run the application:
    ```bash
@@ -52,9 +53,10 @@ The **AI Resume Analyzer** is a comprehensive web application developed using St
 .
 ├── app.py                 # Main application script
 ├── requirements.txt       # Python dependencies
-├── Courses.py             # Module containing recommended course data
 ├── README.md              # Project documentation
 └── .env                   # Environment variables for database configuration
+└── asset
+      
 ```
 
 ## Usage Guide
